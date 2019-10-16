@@ -6,7 +6,7 @@ import numpy as np
 from copy import copy
 from matplotlib import pyplot as plt
 import pytesseract
-
+import re
 
 class ReceiptImageService():
     def __init__(self, imagepath):
@@ -21,46 +21,55 @@ class ReceiptImageService():
         self.corners = []
         cv2.imshow("xx",self.org)
 
-    def transform(self,corners,threshold):
+    def transform(self,corners):
         x = max(corners[1][0] - corners[0][0], corners[2][0] - corners[3][0])
         y = max(corners[3][1] - corners[0][1], corners[3][1] - corners[2][1])
         dst = np.float32([(0,0),(x,0),(x,y),(0,y)])
         corners = np.float32(corners)
         m = cv2.getPerspectiveTransform(corners,dst)
         self.trsfmd = cv2.cvtColor(cv2.warpPerspective(self.org,m,(x,y)),cv2.COLOR_RGB2GRAY)
+        self.trsfmd = cv2.adaptiveThreshold(self.trsfmd, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 51, 10)
         #_,self.trsfmd = cv2.threshold(self.trsfmd,threshold,255,cv2.THRESH_BINARY)
-        self.trsfmd = cv2.adaptiveThreshold(self.trsfmd,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,71,threshold)
 
     def getText(self):
-        self.transform(self.corners,17)
-        self.text = pytesseract.image_to_string(self.trsfmd)
-
+        self.transform(self.corners)
+        p = [5,11,27,71]
+        # dbs = [cv2.adaptiveThreshold(tsfmd, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, i,
+        #                                     10) for i in p ]
+        # cv2.adaptiveThreshold(tsfmd, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31,10)
+        self.text = pytesseract.image_to_string(self.gray, 'pol')
+    def extractData(self):
+        pass
     def findCorners(self):
-        _,bi = cv2.threshold(self.gray,125,255,cv2.THRESH_BINARY)
-        #bi = cv2.adaptiveThreshold(self.gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,5)
+        _,bi = cv2.threshold(self.gray,127,255,cv2.THRESH_BINARY)
+        # bi = cv2.adaptiveThreshold(self.gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,31,10)
         edges = cv2.Canny(bi, 130, 130, apertureSize=3)
-        borders = self.findBorders(edges)
-        #cv2.imshow("xx", edges)
-        nw = [[borders[0][0], borders[0][1]], [borders[2][0], borders[2][1]]]
-        ww_nw = [-borders[0][2], -borders[2][2]]
-        sw = [[borders[0][0], borders[0][1]], [borders[3][0], borders[3][1]]]
-        ww_sw = [-borders[0][2], -borders[3][2]]
-        ne = [[borders[1][0], borders[1][1]], [borders[2][0], borders[2][1]]]
-        ww_ne = [-borders[1][2], -borders[2][2]]
-        se = [[borders[1][0], borders[1][1]], [borders[3][0], borders[3][1]]]
-        ww_se = [-borders[1][2], -borders[3][2]]
-        m = (nw,ne,se,sw)
-        ww = (ww_nw,ww_ne,ww_se,ww_sw)
-        corners = []
-        for i in range(len(m)):
-            temp = solve(m[i],ww[i])
-            point_temp = tuple([int(i) for i in temp])
-            corners.append(point_temp)
-            self.img = cv2.circle(self.img, point_temp, 5, (0, 255, 0), thickness=2)
-            #cv2.imshow('edges', self.img)
-            #cv2.waitKey()
-        self.corners = corners
-        return corners
+        try:
+            borders = self.findBorders(edges)
+            #cv2.imshow("xx", edges)
+            nw = [[borders[0][0], borders[0][1]], [borders[2][0], borders[2][1]]]
+            ww_nw = [-borders[0][2], -borders[2][2]]
+            sw = [[borders[0][0], borders[0][1]], [borders[3][0], borders[3][1]]]
+            ww_sw = [-borders[0][2], -borders[3][2]]
+            ne = [[borders[1][0], borders[1][1]], [borders[2][0], borders[2][1]]]
+            ww_ne = [-borders[1][2], -borders[2][2]]
+            se = [[borders[1][0], borders[1][1]], [borders[3][0], borders[3][1]]]
+            ww_se = [-borders[1][2], -borders[3][2]]
+            m = (nw,ne,se,sw)
+            ww = (ww_nw,ww_ne,ww_se,ww_sw)
+            corners = []
+            for i in range(len(m)):
+                temp = solve(m[i],ww[i])
+                point_temp = tuple([int(i) for i in temp])
+                corners.append(point_temp)
+                self.img = cv2.circle(self.img, point_temp, 5, (0, 255, 0), thickness=-1)
+                #cv2.imshow('edges', self.img)
+                #cv2.waitKey()
+            self.corners = corners
+        except (TypeError,np.linalg.LinAlgError):
+            pass
+            self.corners = ((0,0),(self.img.shape[1],0),(self.img.shape[1],self.img.shape[0]),(0,self.img.shape[0]))
+        return self.corners
 
     def tc(self,r1,t1,r2,t2,epsA,epsB):
         if abs(r1-r2)<epsA and abs(t1-t2)<epsB:
@@ -91,7 +100,7 @@ class ReceiptImageService():
             list_of_index.append(index)
         result = []
         ind = 0
-        print(list_of_index)
+        cv2.imshow("x",edges)
         for line in list_of_index:
             for rho, theta in lines[line]:
                 A = math.cos(theta)
@@ -123,19 +132,20 @@ class ReceiptImageService():
                 top_center = (self.img.shape[1] // 2, 0)
                 bottom_center = (self.img.shape[1] // 2, self.img.shape[0])
                 line_p = (A, B, C)
+                wsp = ind/1000+1
                 try:
                     distance_left = self.distance(left_center,
-                                                  line_p)*(ind/1000+1) if theta < math.pi / 24 else 100000 #or theta > 23 * math.pi / 24
+                                                  line_p)*wsp if theta < math.pi / 24 else 100000 #or theta > 23 * math.pi / 24
                     distance_right = self.distance(right_center,
-                                                   line_p)*(ind/1000+1) if theta > 23 * math.pi / 24 else 100000
+                                                   line_p)*wsp if theta > 23 * math.pi / 24 else 100000
                 except (ZeroDivisionError, ArithmeticError):
                     distance_left = self.distance(left_center, line_p)*(ind/1000+1)
                     distance_right = self.distance(right_center, line_p)*(ind/1000+1)
                 try:
                     distance_top = self.distance(top_center,
-                                                 line_p)*(ind/1000+1) if 11 * math.pi / 24 < theta < 13 * math.pi / 24 else 100000
+                                                 line_p)*wsp if 11 * math.pi / 24 < theta < 13 * math.pi / 24 else 100000
                     distance_bottom = self.distance(bottom_center,
-                                                    line_p)*(ind/1000+1) if 11 * math.pi / 24 < theta < 13 * math.pi / 24 else 100000
+                                                    line_p)*wsp if 11 * math.pi / 24 < theta < 13 * math.pi / 24 else 100000
                 except (ZeroDivisionError, ArithmeticError):
                     distance_top = 10000
                     distance_bottom = 10000
@@ -154,15 +164,16 @@ class ReceiptImageService():
         return q
 
 
-ris = ReceiptImageService('img5.jpg')
+ris = ReceiptImageService('../../media/img5.jpg')
 cv2.imshow("xd",ris.gray)
 # edges = cv2.Canny(ris.org,100,200)
 # cv2.imshow("xx",edges)
 # ris.findBorders(edges)
 # cv2.imshow("x",cv2.resize(ris.img,None,fx=0.7,fy=0.7))
 x= ris.findCorners()
+print(ris.corners)
 ris.getText()
 cv2.imshow("xx",ris.trsfmd)
 print(ris.text)
-cv2.imshow("xcd",ris.img)
+cv2.imshow("xcd",cv2.resize(ris.img,None,fx=0.5, fy=0.5))
 cv2.waitKey()

@@ -8,4 +8,5 @@ urlpatterns = [
 ]
 
 if settings.DEBUG:
-    urlpatterns += [path('media/<path>',serve,{'document_root':settings.MEDIA_ROOT})]
+    urlpatterns += [path(settings.MEDIA_URL+'avatars/<path>',serve,{'document_root':settings.MEDIA_ROOT+'/avatars'})]
+    urlpatterns += [path(settings.MEDIA_URL+'receipts/<path>',serve,{'document_root':settings.MEDIA_ROOT+'/receipts'})]
