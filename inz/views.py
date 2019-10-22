@@ -10,6 +10,7 @@ from .permissions import BelongToLoggedUser
 from django.http import HttpResponseForbidden
 # Create your views here.
 
+
 @permission_classes([AllowAny])
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')

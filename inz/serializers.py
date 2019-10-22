@@ -7,10 +7,15 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User()
         user.email = validated_data['email']
-        user.first_name = validated_data['first_name']
-        user.last_name = validated_data['last_name']
+        try:
+            user.first_name = validated_data['first_name']
+            user.last_name = validated_data['last_name']
+        except KeyError:
+            user.last_name = None
+            user.first_name = None
         user.set_password(validated_data['password'])
         user.save()
+        res = {'created':'true'}
         return user
 
     class Meta:
