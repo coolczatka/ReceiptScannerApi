@@ -28,16 +28,12 @@ class ReceiptImageService():
         corners = np.float32(corners)
         m = cv2.getPerspectiveTransform(corners,dst)
         self.trsfmd = cv2.cvtColor(cv2.warpPerspective(self.org,m,(x,y)),cv2.COLOR_RGB2GRAY)
-        self.trsfmd = cv2.adaptiveThreshold(self.trsfmd, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 51, 10)
-        #_,self.trsfmd = cv2.threshold(self.trsfmd,threshold,255,cv2.THRESH_BINARY)
+        _,self.trsfmd = cv2.threshold(self.trsfmd,127,255,cv2.THRESH_BINARY)
+        #self.trsfmd = cv2.adaptiveThreshold(self.trsfmd, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 51, 10)
 
     def getText(self):
         self.transform(self.corners)
-        p = [5,11,27,71]
-        # dbs = [cv2.adaptiveThreshold(tsfmd, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, i,
-        #                                     10) for i in p ]
-        # cv2.adaptiveThreshold(tsfmd, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31,10)
-        self.text = pytesseract.image_to_string(self.gray, 'pol')
+        self.text = pytesseract.image_to_string(self.trsfmd,'Merchant')
     def extractData(self):
         pass
     def findCorners(self):
