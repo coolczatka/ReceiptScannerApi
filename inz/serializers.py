@@ -4,7 +4,6 @@ from .models import *
 
 
 class UserSerializer(serializers.ModelSerializer):
-    #nie dziala
     def create(self, validated_data):
         user = User()
         user.email = validated_data['email']
@@ -33,7 +32,20 @@ class GroupSerializer(serializers.ModelSerializer):
 
 
 class ReceiptSerializer(serializers.ModelSerializer):
-
+    #to nie dziala
+    def create(self,validated_data):
+        receipt = Receipt()
+        receipt.shop = validated_data['shop']
+        try:
+            receipt.date = validated_data['date']
+        except KeyError:
+            receipt.date = None
+        request = self.context['request']
+        user = None
+        if request and request.hasattr('user'):
+            user = request.user
+        receipt.user = user
+        receipt.save()
 
     class Meta:
         model = Receipt
