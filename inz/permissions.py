@@ -12,3 +12,12 @@ class BelongToLoggedUser(permissions.BasePermission):
             return True
 
 
+class UserPermissions(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method in ['POST']:
+            return True
+        if request.method in ['PUT', 'PATCH', 'DELETE']:
+            return True if request.user is not None else False
+        else:
+            return False
+

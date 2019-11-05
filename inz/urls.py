@@ -6,7 +6,6 @@ from django.views.static import serve
 from rest_framework.authtoken import views
 from .views import *
 
-
 router = DefaultRouter()
 router.register('users',UserViewSet,base_name='user')
 router.register('groups',GroupViewSet,base_name='group')
@@ -20,4 +19,4 @@ urlpatterns += [path('login',views.obtain_auth_token)]
 
 if settings.DEBUG:
     urlpatterns += [path(settings.MEDIA_URL+'avatars/<path>',serve,{'document_root':settings.MEDIA_ROOT+'/avatars'})]
-    urlpatterns += [path(settings.MEDIA_URL+'receipts/<path>',serve,{'document_root':settings.MEDIA_ROOT+'/receipts'})]
+    urlpatterns += [path(settings.MEDIA_URL+'receipts/<path>',serve,{'document_root':settings.MEDIA_ROOT+'/receiptss'})]

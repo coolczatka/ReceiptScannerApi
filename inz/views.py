@@ -5,15 +5,15 @@ from .models import *
 from .serializers import *
 from rest_framework.decorators import (permission_classes,action)
 from rest_framework.permissions import (IsAuthenticated, IsAdminUser, AllowAny)
-from .permissions import BelongToLoggedUser
+from .permissions import (BelongToLoggedUser,UserPermissions)
 
 from django.http import HttpResponseForbidden
 # Create your views here.
 
 
-@permission_classes([AllowAny])
+@permission_classes([UserPermissions])
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all().order_by('-date_joined')
+    queryset = User.objects.all()
     serializer_class = UserSerializer
 
 
@@ -34,7 +34,6 @@ class ReceiptViewSet(viewsets.ModelViewSet):
 class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     queryset = Product.objects.all()
-
 
 
 

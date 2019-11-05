@@ -52,7 +52,7 @@ class Receipt(models.Model):
     date = models.DateTimeField(null=True)
     user = models.ForeignKey(User, models.SET_NULL,null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    image = models.OneToOneField(Picture, on_delete=models.SET_NULL, null=True)
+    image = models.OneToOneField(Picture, on_delete=models.CASCADE, null=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def getProducts(self):
