@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import Group
+from rest_framework.authtoken.models import Token
 from .models import *
 
 
@@ -17,8 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
             user.last_name = None
         user.set_password(validated_data['password'])
         user.save()
-        res = {'created':'true'}
-        return res
+        return user
 
     class Meta:
         model = User
@@ -33,19 +33,6 @@ class GroupSerializer(serializers.ModelSerializer):
 
 class ReceiptSerializer(serializers.ModelSerializer):
     #to nie dziala
-    def create(self,validated_data):
-        receipt = Receipt()
-        receipt.shop = validated_data['shop']
-        try:
-            receipt.date = validated_data['date']
-        except KeyError:
-            receipt.date = None
-        request = self.context['request']
-        user = None
-        if request and request.hasattr('user'):
-            user = request.user
-        receipt.user = user
-        receipt.save()
 
     class Meta:
         model = Receipt

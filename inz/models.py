@@ -49,7 +49,7 @@ class Picture(models.Model):
 
 class Receipt(models.Model):
     shop = models.CharField(max_length=50, blank=True)
-    date = models.DateTimeField(null=True)
+    date = models.DateField(null=True)
     user = models.ForeignKey(User, models.SET_NULL,null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     image = models.OneToOneField(Picture, on_delete=models.CASCADE, null=True)
@@ -66,5 +66,6 @@ class Product(models.Model):
     receipt = models.ForeignKey(Receipt, models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
 
 

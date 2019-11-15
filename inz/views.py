@@ -25,10 +25,16 @@ class GroupViewSet(viewsets.ModelViewSet):
 @permission_classes([IsAuthenticated])
 class ReceiptViewSet(viewsets.ModelViewSet):
     serializer_class = ReceiptSerializer
-
+    queryset = Receipt.objects.all()
     def get_queryset(self):
         return Receipt.objects.filter(user=self.request.user)
 
+    def update(self, request, *args, **kwargs):
+        receipt = Receipt.objects.filter(pk=request['id'])
+        receipt.shop = request['shop']
+        receipt.date = request['date']
+        receipt.save()
+        return receipt
 
 @permission_classes([BelongToLoggedUser,IsAuthenticated])
 class ProductViewSet(viewsets.ModelViewSet):
