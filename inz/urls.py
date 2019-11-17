@@ -10,7 +10,7 @@ router = DefaultRouter()
 router.register('users',UserViewSet,base_name='user')
 router.register('groups',GroupViewSet,base_name='group')
 router.register('receipts',ReceiptViewSet,base_name='receipt')
-router.register('products',ProductViewSet,base_name='product')
+router.register('products/(?P<id>\d+)',ProductViewSet,base_name='product')
 urlpatterns = router.urls
 
 # Auth Token

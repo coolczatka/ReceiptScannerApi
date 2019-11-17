@@ -26,20 +26,24 @@ class GroupViewSet(viewsets.ModelViewSet):
 class ReceiptViewSet(viewsets.ModelViewSet):
     serializer_class = ReceiptSerializer
     queryset = Receipt.objects.all()
+
     def get_queryset(self):
         return Receipt.objects.filter(user=self.request.user)
 
-    def update(self, request, *args, **kwargs):
-        receipt = Receipt.objects.filter(pk=request['id'])
-        receipt.shop = request['shop']
-        receipt.date = request['date']
-        receipt.save()
-        return receipt
 
-@permission_classes([BelongToLoggedUser,IsAuthenticated])
+@permission_classes([BelongToLoggedUser, IsAuthenticated])
 class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
-    queryset = Product.objects.all()
 
+    def get_queryset(self):
+        return Product.objects.filter(receipt=Receipt.objects.get(pk=self.kwargs['id']))
+
+    def create(self, request, *args, **kwargs):
+        request.POST['receipt']=self.kwargs['id']
+        super().create(request,args,kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        request.POST['receipt']=self.kwargs['id']
+        super().partial_update(request,args,kwargs)
 
 

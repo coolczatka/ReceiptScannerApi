@@ -32,7 +32,6 @@ class GroupSerializer(serializers.ModelSerializer):
 
 
 class ReceiptSerializer(serializers.ModelSerializer):
-    #to nie dziala
 
     class Meta:
         model = Receipt
