@@ -2,7 +2,7 @@ from rest_framework import permissions
 from .models import *
 
 
-class BelongToLoggedUser(permissions.BasePermission):
+class AllowOwner_p(permissions.BasePermission):
     message = 'To nie twoje'
 
     def has_object_permission(self, request, view, obj):
@@ -11,6 +11,13 @@ class BelongToLoggedUser(permissions.BasePermission):
         if receipt in temp:
             return True
 
+class AllowOwner_r(permissions.BasePermission):
+    message = 'To nie twoje'
+
+    def has_object_permission(self, request, view, obj):
+        temp = Receipt.objects.filter(user=request.user)
+        if obj in temp:
+            return True
 
 class UserPermissions(permissions.BasePermission):
     def has_permission(self, request, view):

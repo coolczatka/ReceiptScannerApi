@@ -19,7 +19,7 @@ class ReceiptImageService():
         self.gray = cv2.cvtColor(self.img, cv2.COLOR_RGB2GRAY)
         self.lines = []
         self.corners = []
-        cv2.imshow("xx",self.org)
+        # cv2.imshow("xx",self.org)
 
     def transform(self,corners):
         x = max(corners[1][0] - corners[0][0], corners[2][0] - corners[3][0])
@@ -33,9 +33,30 @@ class ReceiptImageService():
 
     def getText(self):
         self.transform(self.corners)
-        self.text = pytesseract.image_to_string(self.trsfmd,'Merchant')
+        self.text = pytesseract.image_to_string(self.trsfmd,'pol')
     def extractData(self):
-        pass
+        date = re.findall(r'[0-9]{4}-[0-9]{2}-[0-9]{2}',self.text)
+        print(date[0])
+        shop = self.text.split(date[0])[0]
+        products_regex = re.findall(r'(.+) . (.+)[x* ]*([0-9]+[,. ]?[0-9]{2}).',self.text.split(date[0])[1])
+        products = []
+        for i in products_regex:
+            amount = re.search(r'^[0-9]+[^,]',i[1])
+            amount = float(amount.group()[:len(amount.group())-1]) if amount != None else 1
+            price = 1
+            if(i[1].rstrip()[-3]!=','):
+                price = i[1][:len(i[1])-2]+','+i[1][len(i[1])-2:]
+            else:
+                price = i[1]
+            try:
+                price = re.search(r'[0-9]+,[0-9]{2}',price).group()
+                products.append([i[0],amount,price])
+            except AttributeError:
+                pass
+        print(products_regex)
+        print(products)
+        return {'shop':shop,'date':date,'products':products}
+
     def findCorners(self):
         _,bi = cv2.threshold(self.gray,127,255,cv2.THRESH_BINARY)
         # bi = cv2.adaptiveThreshold(self.gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,31,10)
@@ -96,7 +117,7 @@ class ReceiptImageService():
             list_of_index.append(index)
         result = []
         ind = 0
-        cv2.imshow("x",edges)
+        # cv2.imshow("x",edges)
         for line in list_of_index:
             for rho, theta in lines[line]:
                 A = math.cos(theta)
@@ -160,16 +181,18 @@ class ReceiptImageService():
         return q
 
 
-ris = ReceiptImageService('../../media/img5.jpg')
-cv2.imshow("xd",ris.gray)
-# edges = cv2.Canny(ris.org,100,200)
-# cv2.imshow("xx",edges)
-# ris.findBorders(edges)
-# cv2.imshow("x",cv2.resize(ris.img,None,fx=0.7,fy=0.7))
-x= ris.findCorners()
-print(ris.corners)
-ris.getText()
-cv2.imshow("xx",ris.trsfmd)
-print(ris.text)
-cv2.imshow("xcd",cv2.resize(ris.img,None,fx=0.5, fy=0.5))
-cv2.waitKey()
+# ris = ReceiptImageService('../../media/img9.jpg')
+# cv2.imshow("xd",ris.gray)
+# # edges = cv2.Canny(ris.org,100,200)
+# # cv2.imshow("xx",edges)
+# # ris.findBorders(edges)
+# # cv2.imshow("x",cv2.resize(ris.img,None,fx=0.7,fy=0.7))
+# x= ris.findCorners()
+# print(ris.corners)
+# ris.getText()
+# print(ris.text)
+# ris.extractData()
+# cv2.imshow("xx",ris.trsfmd)
+#
+# cv2.imshow("xcd",cv2.resize(ris.img,None,fx=0.5, fy=0.5))
+# cv2.waitKey()

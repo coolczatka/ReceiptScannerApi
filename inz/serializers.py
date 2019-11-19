@@ -2,7 +2,9 @@ from rest_framework import serializers
 from django.contrib.auth.models import Group
 from rest_framework.authtoken.models import Token
 from .models import *
-
+from .services.ReceiptImageService import ReceiptImageService
+import json
+import os
 
 class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
@@ -45,6 +47,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class ImageSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Picture
         fields = "__all__"

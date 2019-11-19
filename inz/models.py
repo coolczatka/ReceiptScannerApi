@@ -43,7 +43,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class Picture(models.Model):
-    picture = models.ImageField(blank=True)
+    picture = models.ImageField()
     created_at = models.DateTimeField(auto_now_add=True)
 
 
@@ -54,6 +54,9 @@ class Receipt(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     image = models.OneToOneField(Picture, on_delete=models.CASCADE, null=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __int__(self):
+        return self.pk
 
     def getProducts(self):
         return Product.objects.filter(receipt=self)
