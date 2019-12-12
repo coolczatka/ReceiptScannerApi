@@ -4,5 +4,5 @@ from .models import *
 admin.site.register(User)
 admin.site.register(Product)
 admin.site.register(Picture)
-
 admin.site.register(Receipt)
+admin.site.register(Shop)

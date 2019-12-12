@@ -71,4 +71,11 @@ class Product(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
+class Shop(models.Model):
+    name = models.CharField(max_length=50)
+    category = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.name
+
 

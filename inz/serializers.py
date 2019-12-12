@@ -51,3 +51,9 @@ class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Picture
         fields = "__all__"
+
+
+class ShopSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Shop
+        fields = "__all__"

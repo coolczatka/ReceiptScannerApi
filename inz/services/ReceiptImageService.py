@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 import pytesseract
 import re
 
+
 class ReceiptImageService():
     def __init__(self, imagepath):
         pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'

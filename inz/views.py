@@ -8,6 +8,7 @@ from rest_framework.decorators import (permission_classes,action)
 from rest_framework.permissions import (IsAuthenticated, IsAdminUser, AllowAny)
 from .permissions import (AllowOwner_p,AllowOwner_r,UserPermissions)
 from .services.ReceiptImageService import ReceiptImageService
+import regex
 
 from django.http import HttpResponseForbidden
 # Create your views here.
@@ -48,7 +49,18 @@ class PictureViewSet(viewsets.ModelViewSet):
         ris.findCorners()
         ris.getText()
         data = ris.extractData()
+        shops = Shop.objects.all()
+        flag = False
+        for shop in shops:
+            r = regex.compile('(' + shop.name + '){e<=2}', regex.IGNORECASE)
+            if r.search(data['shop']):
+                data['shop']=shop.name
+                flag = True
+                break
+        if not flag:
+            data['shop']=''
         return Response({'data':data})
+
 
 @permission_classes([AllowOwner_p, IsAuthenticated])
 class ProductViewSet(viewsets.ModelViewSet):
@@ -64,6 +76,11 @@ class ProductViewSet(viewsets.ModelViewSet):
         serializer.save(receipt=receipt)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data,status=201,headers=headers)
+
+
+class ShopViewSet(viewsets.ModelViewSet):
+    serializer_class = ShopSerializer
+    queryset = Shop.objects.all()
 
 
 

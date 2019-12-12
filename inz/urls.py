@@ -13,6 +13,7 @@ router.register('groups',GroupViewSet,base_name='group')
 router.register('receipts',ReceiptViewSet,base_name='receipt')
 router.register('products/(?P<receipt_id>\d+)',ProductViewSet,base_name='product')
 router.register('pictures',PictureViewSet,base_name='picture')
+router.register('shops',ShopViewSet,base_name='shop')
 urlpatterns = router.urls
 
 # Auth Token
