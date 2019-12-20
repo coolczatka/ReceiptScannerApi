@@ -6,6 +6,7 @@ import numpy as np
 from copy import copy
 from matplotlib import pyplot as plt
 import pytesseract
+import datetime
 import re
 
 
@@ -36,27 +37,52 @@ class ReceiptImageService():
         self.transform(self.corners)
         self.text = pytesseract.image_to_string(self.trsfmd,'pol')
     def extractData(self):
+        date = []
         date = re.findall(r'[0-9]{4}-[0-9]{2}-[0-9]{2}',self.text)
-        print(date[0])
-        shop = self.text.split(date[0])[0]
-        products_regex = re.findall(r'(.+) . (.+)[x* ]*([0-9]+[,. ]?[0-9]{2}).',self.text.split(date[0])[1])
+        if len(date)==0:
+            date = re.findall(r'[0-9]{2}-[0-9]{2}-[0-9]{4}', self.text)
+            if len(date)>0:
+                date[0] = date[0].split("-").reverse().join('-')
+        shop = ""
+        products_regex = ""
+        if len(date) == 0:
+            date = [""]
+            shop = self.text
+            products_regex = products_regex = re.findall(r'(.+) . (.+)[x* ]*([0-9]+[,. ]?[0-9]{2}).',self.text)
+        else:
+            try:
+                if datetime.datetime.strptime(date[0],"%Y-%m-%d")>datetime.datetime.today():
+                    date[0] = str(datetime.date.today().year)+"-"+str(datetime.date.today().month)+"-"+str(datetime.date.today().day)
+            except ValueError:
+                date[0] = str(datetime.date.today().year) + "-" + str(datetime.date.today().month) + "-" + str(datetime.date.today().day)
+            try:
+                shop = self.text.split(date[0])[0]
+            except IndexError:
+                shop = ""
+            try:
+                products_regex = re.findall(r'(.+) . (.+)[x* ]*([0-9]+[,. ]?[0-9]{2}).',self.text.split(date[0])[1])
+            except IndexError:
+                products_regex = re.findall(r'(.+) . (.+)[x* ]*([0-9]+[,. ]?[0-9]{2}).',self.text)
         products = []
         for i in products_regex:
             amount = re.search(r'^[0-9]+[^,]',i[1])
             amount = float(amount.group()[:len(amount.group())-1]) if amount != None else 1
             price = 1
-            if(i[1].rstrip()[-3]!=','):
-                price = i[1][:len(i[1])-2]+','+i[1][len(i[1])-2:]
-            else:
-                price = i[1]
+            try:
+                if(i[1].rstrip()[-3]!=','):
+                    price = i[1][:len(i[1])-2]+','+i[1][len(i[1])-2:]
+                else:
+                    price = i[1]
+            except IndexError:
+                price=i[1]
             try:
                 price = re.search(r'[0-9]+,[0-9]{2}',price).group()
-                products.append([i[0],amount,price])
+                products.append({'name':i[0],'amount':str(amount),'price':price})
             except AttributeError:
                 pass
         print(products_regex)
         print(products)
-        return {'shop':shop,'date':date,'products':products}
+        return {'shop':shop,'date':date[0],'products':products}
 
     def findCorners(self):
         _,bi = cv2.threshold(self.gray,127,255,cv2.THRESH_BINARY)
@@ -180,20 +206,3 @@ class ReceiptImageService():
             ind = [(j[i], j[4]) for j in dt]
             q.append(ind)
         return q
-
-
-# ris = ReceiptImageService('../../media/img9.jpg')
-# cv2.imshow("xd",ris.gray)
-# # edges = cv2.Canny(ris.org,100,200)
-# # cv2.imshow("xx",edges)
-# # ris.findBorders(edges)
-# # cv2.imshow("x",cv2.resize(ris.img,None,fx=0.7,fy=0.7))
-# x= ris.findCorners()
-# print(ris.corners)
-# ris.getText()
-# print(ris.text)
-# ris.extractData()
-# cv2.imshow("xx",ris.trsfmd)
-#
-# cv2.imshow("xcd",cv2.resize(ris.img,None,fx=0.5, fy=0.5))
-# cv2.waitKey()

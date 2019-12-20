@@ -43,7 +43,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class Picture(models.Model):
-    picture = models.ImageField()
+    picture = models.FileField()
     created_at = models.DateTimeField(auto_now_add=True)
 
 
@@ -64,7 +64,7 @@ class Receipt(models.Model):
 
 class Product(models.Model):
     name = models.CharField(max_length=50)
-    amount = models.IntegerField(default=1)
+    amount = models.DecimalField(decimal_places=2,default=1,max_digits=10)
     price = models.DecimalField(decimal_places=2, max_digits=10)
     receipt = models.ForeignKey(Receipt, models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
