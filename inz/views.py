@@ -26,6 +26,14 @@ class ReceiptViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Receipt.objects.filter(user=self.request.user).order_by("-date")
 
+    def create(self, request, *args, **kwargs):
+        serializer = ReceiptSerializer(data=request.data)
+        serializer.is_valid()
+        serializer.save(user=self.request.user)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=201, headers=headers)
+
+
 
 @permission_classes([IsAuthenticated])
 class PictureViewSet(viewsets.ModelViewSet):
@@ -33,7 +41,6 @@ class PictureViewSet(viewsets.ModelViewSet):
     queryset = Picture.objects.all()
 
     def create(self, request, *args, **kwargs):
-        print(request.data)
         serializer = ImageSerializer(data=request.data)
         if(not serializer.is_valid()):
             print(serializer.errors)
@@ -55,7 +62,7 @@ class PictureViewSet(viewsets.ModelViewSet):
         if not flag:
             data['shop']= ''
         return Response({'shop':data['shop'],'date':data['date'],'products':data['products']})
-
+        # return Response({'shop':'biedronka','date':'2019-08-09','products':[{'name':'n1','amount':'1.0','price':'19.99'},{'name':'produkt','amount':'2.0','price':'24.99'}]})
 
 @permission_classes([AllowOwner_p, IsAuthenticated])
 class ProductViewSet(viewsets.ModelViewSet):

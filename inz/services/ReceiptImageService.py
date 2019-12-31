@@ -48,7 +48,7 @@ class ReceiptImageService():
         if len(date) == 0:
             date = [""]
             shop = self.text
-            products_regex = products_regex = re.findall(r'(.+) . (.+)[x* ]*([0-9]+[,. ]?[0-9]{2}).',self.text)
+            products_regex = re.findall(r'(.+) . (.+)[x* ]*([0-9]+[,. ]?[0-9]{2}).',self.text)
         else:
             try:
                 if datetime.datetime.strptime(date[0],"%Y-%m-%d")>datetime.datetime.today():
