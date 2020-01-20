@@ -72,12 +72,17 @@ class ProductViewSet(viewsets.ModelViewSet):
         return Product.objects.filter(receipt=Receipt.objects.get(pk=self.kwargs['receipt_id']))
 
     def create(self, request, *args, **kwargs):
-        serializer = ProductSerializer(data=request.data)
-        receipt = Receipt.objects.get(pk=self.kwargs['receipt_id'])
-        serializer.is_valid(raise_exception=True)
-        serializer.save(receipt=receipt)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data,status=201,headers=headers)
+        try:
+            request.data['amount'] = round(request.data['amount'],2)
+            request.data['price'] = round(request.data['price'],2)
+            serializer = ProductSerializer(data=request.data)
+            receipt = Receipt.objects.get(pk=self.kwargs['receipt_id'])
+            serializer.is_valid(raise_exception=True)
+            serializer.save(receipt=receipt)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data,status=201,headers=headers)
+        except Exception as e:
+            print("blad: {0}".format(e)+"\n"+str(serializer.data))
 
 @permission_classes([AllowAny]) #tymczasowo
 class ShopViewSet(viewsets.ModelViewSet):

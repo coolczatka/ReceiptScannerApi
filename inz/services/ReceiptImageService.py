@@ -8,11 +8,11 @@ from matplotlib import pyplot as plt
 import pytesseract
 import datetime
 import re
-
+from django.conf import settings
 
 class ReceiptImageService():
     def __init__(self, imagepath):
-        pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+        pytesseract.pytesseract.tesseract_cmd = settings.TESSERACT_PATH
         self.org = cv2.imread(imagepath)
         #self.org = cv2.resize(self.org, None, fx=0.5, fy=0.5)
         self.img = copy(self.org)

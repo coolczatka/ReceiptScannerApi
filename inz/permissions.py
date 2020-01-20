@@ -21,7 +21,7 @@ class AllowOwner_r(permissions.BasePermission):
 
 class UserPermissions(permissions.BasePermission):
     def has_permission(self, request, view):
-        if request.method in ['POST']:
+        if request.method in ['GET','POST']:
             return True
         if request.method in ['PUT', 'PATCH', 'DELETE']:
             return True if request.user is not None else False
