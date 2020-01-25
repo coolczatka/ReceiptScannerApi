@@ -15,8 +15,8 @@ router.register('shops',ShopViewSet,base_name='shop')
 urlpatterns = router.urls
 
 # Auth Token
-urlpatterns += [path('login',views.obtain_auth_token)]
-urlpatterns += [path('sum',sumOfMounth)]
-urlpatterns += [path('pie',pieData)]
+urlpatterns += [path('login/',views.obtain_auth_token)]
+urlpatterns += [path('sum/',sumOfMounth)]
+urlpatterns += [path('pie/',pieData)]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
